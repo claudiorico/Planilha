@@ -1,0 +1,118 @@
+<html>
+	<head>
+		<title>Plan002</title>
+		<style>
+			:root {
+				--corgeral: rgb(0,91,142);
+				}
+			* {
+				color: var(--corgeral);
+				font-family: Verdana;
+				font-size: 14px;
+				}
+			 BODY {width: 120%;}
+			 HEADER {
+				margin-bottom: 20px;
+				}
+			 UL#main {
+				
+				}
+			 UL#main, UL#main LI UL {
+				list-style-type: none;
+				display: table-row;
+				max-height: 20px;
+				}
+			UL#main LI UL LI {
+				
+				border: solid 1px lightgrey; 
+				display: inline-block;
+				height: 30px;
+				margin: 0px;
+				max-height: 30px;
+				overflow: hidden;
+				padding: 0px;
+				text-overflow: hidden;
+				white-space: nowrap;
+				width: 90px;
+				}
+			LI[id^='t000c'] {
+				align-items: center;
+				background-color: var(--corgeral);
+				color: white;
+				line-height: 210%;
+				padding-top: 10px;
+				text-align: center;
+				vertical-align: center;
+				}
+		</style>
+		<script>
+			var NO_COLUNAS = 20;
+			var NO_LINHAS = 10;
+			var arrTitulos = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T"];
+			// Habilita edição em uma célula
+			function habilEdit(e){
+				e.stopPropagation();
+				var source = e.target || e.srcElement;
+				console.log(source);
+				source.setAttribute("contentEditable",true);
+				source.focus();
+				document.querySelector("INPUT#entry").value = source.innerText;
+				}
+			// Localiza um elemento HTML pelo seu seletor (Classe, Id, etc)
+			function getTag(sele){
+				return document.querySelector(sele);
+				}
+			// Localiza a raiz da planilha
+			function rootPlan(){
+				return getTag("#main");
+				}
+			function addLine(noLin){
+				var conteudo = "";
+				var liMain = document.createElement("LI");
+				var uliMain = null;
+				var uliuMain = null;
+				var sNoLin = noLin.toString();
+				liMain.id = "t"+("000"+(sNoLin).trim()).substr(-3);
+				rootPlan().appendChild(liMain);
+				uliMain = document.createElement("UL");
+				
+				uliMain.id = "t"+("000"+(sNoLin).trim()).substr(-3);
+				liMain.appendChild(uliMain);
+				for(i=1;i<=NO_COLUNAS;i++){
+					uliuMain = document.createElement("LI");
+					uliuMain.id = "t"+("000"+(sNoLin).trim()).substr(-3)+"c"+("000"+(i.toString()).trim()).substr(-3);
+					uliMain.appendChild(uliuMain);
+					}
+				}
+			// Coloca cabeçalhos das colunas
+			function addHeaders(arr){
+				addLine(0);
+				}
+			function addTitles(){
+				var titulos = document.querySelectorAll("LI[id^='t000c']");
+				var ind = 0;
+				titulos.forEach(function(obj){
+					console.log(obj);
+					obj.innerText = arrTitulos[ind++];
+					});
+				}
+			// INICIA PROCESSAMENTO QUANDO TODA A PÁGINA ESTÁTICA FOR CARREGADA
+			function init(){
+				addHeaders(arrTitulos);
+				for(j=1;j<=NO_LINHAS;j++){
+					addLine(j);
+					}
+				addTitles();
+				}
+				
+		</script>
+	</head>
+	<body onload="init();">
+		<header id="entradas">
+			<label><b>Dado/Fórmula: </b></label><input id="entry" type="text" size="50">
+		</header>
+		<ul id="main" onclick="habilEdit(event);">
+		
+		</ul>
+	</body>
+</html>
