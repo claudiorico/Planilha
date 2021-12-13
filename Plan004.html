@@ -1,8 +1,9 @@
 <html>
 	<head>
-		<title>Plan002</title>
+		<title>Plan004</title>
+		<meta charset="iso-8859-1"/>
 		<meta name="author" content="Bernardo Meyer">
-		<meta name="description" content="Evento geral de edição de célula.">
+		<meta name="description" content="Interceptação do menu de contexto. Criada a função contexto no evento oncontextmenu do UL#main">
 		<meta name="keywords" content="sites, web, desenvolvimento, HTML5">
 		<style>
 			:root {
@@ -29,6 +30,7 @@
 				
 				border: solid 1px lightgrey; 
 				display: inline-block;
+				float: none;
 				height: 30px;
 				margin: 0px;
 				max-height: 30px;
@@ -47,19 +49,47 @@
 				text-align: center;
 				vertical-align: center;
 				}
+
 		</style>
 		<script>
 			var NO_COLUNAS = 20;
 			var NO_LINHAS = 10;
 			var arrTitulos = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T"];
+			// Teste de valor numérico
+			function isNumeric(str) {
+				if (typeof str != "string") return false;  
+				return !isNaN(str) && !isNaN(parseFloat(str)) 
+				}
+			function contexto(e){
+				console.log("Contexto");
+				var source = e.target || e.srcElement;
+				console.log(source);
+				e.preventDefault();
+				e.stopPropagation();
+				}
+			// Célula perde o foco
+			function entrou(e){
+				e.stopPropagation();
+				var source = e.target || e.srcElement;
+				console.log(source);
+				var dado = source.innerText;
+				console.log(dado);
+				if( isNumeric(dado) ){
+					source.setAttribute("align","right");
+					}
+				}
 			// Habilita edição em uma célula
 			function habilEdit(e){
 				e.stopPropagation();
 				var source = e.target || e.srcElement;
 				console.log(source);
-				source.setAttribute("contentEditable",true);
-				source.focus();
-				document.querySelector("INPUT#entry").value = source.innerText;
+				// Torna o conteúdo editável apenas se o campo se tratar de uma tag LI
+				if( source.tagName = "LI" && (source.id).substr(0,4) != "t000"  ){
+					source.setAttribute("contentEditable",true);
+					source.focus();
+					document.querySelector("INPUT#entry").value = source.innerText;
+					}
+				document.querySelector("UL[id^='t']").setAttribute("contentEditable",false);
 				}
 			// Localiza um elemento HTML pelo seu seletor (Classe, Id, etc)
 			function getTag(sele){
@@ -83,7 +113,8 @@
 				liMain.appendChild(uliMain);
 				for(i=1;i<=NO_COLUNAS;i++){
 					uliuMain = document.createElement("LI");
-					uliuMain.id = "t"+("000"+(sNoLin).trim()).substr(-3)+"c"+("000"+(i.toString()).trim()).substr(-3);
+					// Rotulação de número de coluna * 10, prevendo inserções
+					uliuMain.id = "t"+("000"+(sNoLin).trim()).substr(-3)+"c"+("000"+((i*10).toString()).trim()).substr(-3);
 					uliMain.appendChild(uliuMain);
 					}
 				}
@@ -103,7 +134,7 @@
 			function init(){
 				addHeaders(arrTitulos);
 				for(j=1;j<=NO_LINHAS;j++){
-					addLine(j);
+					addLine(j*10); // Intervalos de 10/10 na numeração
 					}
 				addTitles();
 				}
@@ -114,7 +145,7 @@
 		<header id="entradas">
 			<label><b>Dado/Fórmula: </b></label><input id="entry" type="text" size="50">
 		</header>
-		<ul id="main" onclick="habilEdit(event);">
+		<ul id="main" onclick="habilEdit(event);" onfocusout="entrou(event)" oncontextmenu="contexto(event)">
 		
 		</ul>
 	</body>
