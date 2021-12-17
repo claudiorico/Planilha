@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>Plan006</title>
+		<title>Plan007</title>
 		<meta charset="iso-8859-1"/>
 		<meta name="author" content="Bernardo Meyer">
 		<meta name="description" content="Interceptação do menu de contexto. Criada a função contexto no evento oncontextmenu do UL#main">
@@ -150,15 +150,23 @@
 				var COLUNA = celIni_col;
 				var vId = null;
 				var irmao = null;
-				while ( COLUNA <= celFim_col ) {
-					
-					noIni.className = "cz";
-					irmao = noIni.nextElementSibling;
-					noIni = irmao;
-					vId = noIni.id;
-					arrd = coord(vId);
-					LINHA = arrd.Linha;
-					COLUNA = arrd.Coluna;
+				var inferior = null;
+				while ( LINHA <= celFim_lin ){
+					while ( COLUNA <= celFim_col ) {
+						// Muda a classe, logo muda o fundo
+						noIni.className = "cz";
+						irmao = noIni.nextElementSibling;
+						noIni = irmao;
+						vId = noIni.id;
+						arrd = coord(vId);
+						LINHA = arrd.Linha;
+						COLUNA = arrd.Coluna;
+						}
+					inferior = noIni.parentElement.parentElement.nextElementSibling;
+					vId = inferior.id;
+					noIni = getTag("LI#"+vId + "c" + celIni_col);
+					LINHA = vId.substr(1,3);
+					COLUNA = celIni_col;
 					}
 				return true;
 				}
