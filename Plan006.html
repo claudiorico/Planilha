@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>Plan005</title>
+		<title>Plan006</title>
 		<meta charset="iso-8859-1"/>
 		<meta name="author" content="Bernardo Meyer">
 		<meta name="description" content="Interceptação do menu de contexto. Criada a função contexto no evento oncontextmenu do UL#main">
@@ -78,6 +78,7 @@
 			var NO_COLUNAS = 20;
 			var NO_LINHAS = 10;
 			var arrTitulos = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T"];
+			var SELE = [];
 			function getTag(obj){
 				return document.querySelector(obj);
 				}
@@ -117,6 +118,15 @@
 					source.setAttribute("align","right");
 					}
 				}
+			// Descobre as células da direita de #celTag até chegar à coluna de celFinal
+			// Anota o conjunto de colunas, à medida em que anda
+			// Desce as linhas até atingir a linha de celFinal
+			// Anota os ids de todas as células.
+			function seleFaixa(){
+				var celIni = getTag("INPUT#celTag").value;
+				var celFim = getTag("INPUT#celFinal").value;
+				return true;
+				}
 			// Habilita edição em uma célula
 			function habilEdit(e){
 				e.stopPropagation();
@@ -129,8 +139,10 @@
 					document.querySelector("INPUT#entry").value = source.innerText;
 					}
 				document.querySelector("UL[id^='t']").setAttribute("contentEditable",false);
-				// Seta célula final
+				// Seta célula final no menu de contexto
 				getTag("INPUT#celFinal").value = source.id;
+				// "Ilumina" intervalo e devolve um array com as células selecionadas
+				SELE = seleFaixa();
 				}
 			// Localiza um elemento HTML pelo seu seletor (Classe, Id, etc)
 			function getTag(sele){
