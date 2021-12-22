@@ -1,6 +1,7 @@
+<!DOCTYPE html>
 <html>
 	<head>
-		<title>Plan007</title>
+		<title>Plan008</title>
 		<meta charset="iso-8859-1"/>
 		<meta name="author" content="Bernardo Meyer">
 		<meta name="description" content="Interceptação do menu de contexto. Criada a função contexto no evento oncontextmenu do UL#main">
@@ -122,6 +123,9 @@
 				console.log(dado);
 				if( isNumeric(dado) ){
 					source.setAttribute("align","right");
+					}
+				if( dado.substr(0,1) == "=" ){
+					source.setAttribute("data-eq",dado.substr(1,99));
 					}
 				}
 			// Destrincha uma célula em linha e coluna
