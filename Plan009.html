@@ -1,0 +1,305 @@
+<! DOCTYPE html>
+<html>
+	<head>
+		<title>Plan008</title>
+		<meta charset="iso-8859-1"/>
+		<meta name="author" content="Bernardo Meyer">
+		<meta name="description" content="Interceptação do menu de contexto. Criada a função contexto no evento oncontextmenu do UL#main">
+		<meta name="keywords" content="sites, web, desenvolvimento, HTML5">
+		<style>
+			:root {
+				--corgeral: rgb(0,91,142);
+				}
+			* {
+				color: var(--corgeral);
+				font-family: Verdana;
+				font-size: 14px;
+				}
+			 BODY {width: 120%;}
+			 BUTTON { border-radius: 6px; }
+			 DIV#ctxt {
+				background-color: antiquewhite;
+				border: solid 1px teal;
+				display: none;
+				font-weight: bold;
+				margin: 0px;
+				padding: 2px;
+				position: absolute;
+				top: -500px;
+				left: 350px;
+				width: 400px;
+				}
+			DIV#ctxt  TABLE {
+				margin: 0px;
+				padding: 0px;
+				width: 100%;
+				}
+			DIV#ctxt  TABLE  CAPTION{
+				font-size: 20px;
+				}
+			HEADER {
+				margin-bottom: 20px;
+				}
+			INPUT {
+				border-radius: 8px;
+				}
+			 UL#main {
+				
+				}
+			 UL#main, UL#main LI UL {
+				list-style-type: none;
+				display: table-row;
+				max-height: 20px;
+				}
+			UL#main LI UL LI {
+				
+				border: solid 1px lightgrey; 
+				display: inline-block;
+				float: none;
+				height: 30px;
+				margin: 0px;
+				max-height: 30px;
+				overflow: hidden;
+				padding: 0px;
+				text-overflow: hidden;
+				white-space: nowrap;
+				width: 90px;
+				}
+			LI[id^='t000c'] {
+				align-items: center;
+				background-color: var(--corgeral);
+				color: white;
+				line-height: 210%;
+				padding-top: 10px;
+				text-align: center;
+				vertical-align: center;
+				}
+			LI.cz {
+				background-color: lightgrey;
+				border: solid 1px white;
+				}
+		</style>
+		<script>
+			var NO_COLUNAS = 20;
+			var NO_LINHAS = 10;
+			var arrTitulos = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T"];
+			var SELE = [];
+			function getTag(obj){
+				return document.querySelector(obj);
+				}
+			function getTags(obj){
+				return document.querySelectorAll(obj);
+				}
+			// CUIDADO: estilo é o formato sem traço ("-")
+			function setTagStyle(obj, estilo, valor){
+				var cmd = "document.querySelector('"+obj+"').style."+estilo+" = "+valor;
+				eval(cmd);
+				return; 
+				}
+			// Teste de valor numérico
+			function isNumeric(str) {
+				if (typeof str != "string") return false;  
+				return !isNaN(str) && !isNaN(parseFloat(str)) 
+				}
+			function show(obj){
+				getTag(obj).style.display = "block";
+				}
+			function contexto(e){
+				console.log("Contexto");
+				var source = e.target || e.srcElement;
+				getTag("INPUT#celTag").value = source.id;
+				console.log(source);
+				show("DIV#ctxt");
+				setTagStyle("DIV#ctxt", "top", e.screenY-e.offsetY);
+				setTagStyle("DIV#ctxt", "left", e.screenX+e.offsetX);
+				e.preventDefault();
+				e.stopPropagation();
+				}
+			// Célula perde o foco
+			function entrou(e){
+				e.stopPropagation();
+				var source = e.target || e.srcElement;
+				console.log(source);
+				var dado = source.innerText;
+				console.log(dado);
+				if( isNumeric(dado) ){
+					source.setAttribute("align","right");
+					}
+				if( dado.substr(0,1) == "=" ){
+					source.setAttribute("data-eq",(dado.substr(1,99)).trim());
+					}
+				}
+			// Destrincha uma célula em linha e coluna
+			function coord(vSeletor){
+				var arrc = [];
+				var celIni = vSeletor;
+				arrc = celIni.split("c");
+				var celIni_lin = arrc[0].substr(1,3);
+				var celIni_col = arrc[1];
+
+				return {Linha: celIni_lin, Coluna: celIni_col};
+				}
+			// DesMarca a seleção com class=cz
+			function desSele(){
+				getTags("UL#main > LI > UL > LI.cz").forEach(function(obj){
+					obj.className = "";
+					});
+				getTag("INPUT#celtag").value = "";
+				getTag("INPUT#celfinal").value = "";
+				}
+			// Numera as células da seleção, em ordem crescente
+			function numeraSele(){
+				var i = 1;
+				getTags("UL#main > LI > UL > LI.cz").forEach(function(obj){
+					obj.innerText = i++;
+					obj.style.textAlign = "right";
+					});				
+				}
+			// Marca a seleção com class=cz
+			function runSele(){
+				SELE = seleFaixa(null);
+				}
+			// Marca a seleção com class=cz
+			function runSeleFormula(){
+				SELE = seleFaixa("calc");
+				}
+			// Descobre as células da direita de #celTag até chegar à coluna de celFinal
+			// Anota o conjunto de colunas, à medida em que anda
+			// Desce as linhas até atingir a linha de celFinal
+			// Anota os ids de todas as células.
+			function seleFaixa(ARG){
+				var arrd = null;
+				// Célula inicial
+				var obj1 = coord(getTag("INPUT#celTag").value);
+				var celIni_lin = obj1.Linha;
+				var celIni_col = obj1.Coluna;
+				// Célula final
+				var obj2 = coord(getTag("INPUT#celFinal").value);
+				var celFim_lin = obj2.Linha;
+				var celFim_col = obj2.Coluna;
+				// Toma célula INICIAL (primeiro nó) e anda para a direita, até a coluna da célula FINAL
+				var noIni = getTag("LI#t"+celIni_lin + "c" + celIni_col);
+				var LINHA = celIni_lin;
+				var COLUNA = celIni_col;
+				var vId = null;
+				var irmao = null;
+				var inferior = null;
+				var no = null;
+				var formula = null;
+				while ( LINHA <= celFim_lin ){
+					while ( COLUNA <= celFim_col ) {
+						// Muda a classe, logo muda o fundo
+						noIni.className = "cz";
+						//irmao = noIni.nextElementSibling;
+						//noIni = irmao;
+						vId = noIni.id;
+						arrd = coord(vId);
+						LINHA = arrd.Linha;
+						COLUNA = arrd.Coluna;
+						if( ARG == "calc" ){
+							if( getTag("LI#"+vId).getAttribute("data-eq") ){
+								no = getTag("LI#"+vId).getAttribute("data-eq");
+								console.log(no);
+								formula = tradFormula(LINHA, COLUNA, no);
+								}
+							}
+						irmao = noIni.nextElementSibling;
+						noIni = irmao;
+						}
+					inferior = noIni.parentElement.parentElement.nextElementSibling;
+					vId = inferior.id;
+					noIni = getTag("LI#"+vId + "c" + celIni_col);
+					LINHA = vId.substr(1,3);
+					COLUNA = celIni_col;
+					}
+				return true;
+				}
+			// Habilita edição em uma célula
+			function habilEdit(e){
+				e.stopPropagation();
+				var source = e.target || e.srcElement;
+				console.log(source);
+				// Torna o conteúdo editável apenas se o campo se tratar de uma tag LI
+				if( source.tagName = "LI" && (source.id).substr(0,4) != "t000"  ){
+					source.setAttribute("contentEditable",true);
+					source.focus();
+					document.querySelector("INPUT#entry").value = source.innerText;
+					}
+				document.querySelector("UL[id^='t']").setAttribute("contentEditable",false);
+				// Seta célula final no menu de contexto
+				if( getTag("INPUT#celFinal").value == "" ){
+					getTag("INPUT#celFinal").value = source.id;
+					}
+				// "Ilumina" intervalo e devolve um array com as células selecionadas
+				
+				}
+			// Localiza um elemento HTML pelo seu seletor (Classe, Id, etc)
+			function getTag(sele){
+				return document.querySelector(sele);
+				}
+			// Localiza a raiz da planilha
+			function rootPlan(){
+				return getTag("#main");
+				}
+			function addLine(noLin){
+				var conteudo = "";
+				var liMain = document.createElement("LI");
+				var uliMain = null;
+				var uliuMain = null;
+				var sNoLin = noLin.toString();
+				liMain.id = "t"+("000"+(sNoLin).trim()).substr(-3);
+				rootPlan().appendChild(liMain);
+				uliMain = document.createElement("UL");
+				
+				uliMain.id = "t"+("000"+(sNoLin).trim()).substr(-3);
+				liMain.appendChild(uliMain);
+				for(i=1;i<=NO_COLUNAS;i++){
+					uliuMain = document.createElement("LI");
+					// Rotulação de número de coluna * 10, prevendo inserções
+					uliuMain.id = "t"+("000"+(sNoLin).trim()).substr(-3)+"c"+("000"+((i*10).toString()).trim()).substr(-3);
+					uliMain.appendChild(uliuMain);
+					}
+				}
+			// Coloca cabeçalhos das colunas
+			function addHeaders(arr){
+				addLine(0);
+				}
+			function addTitles(){
+				var titulos = document.querySelectorAll("LI[id^='t000c']");
+				var ind = 0;
+				titulos.forEach(function(obj){
+					console.log(obj);
+					obj.innerText = arrTitulos[ind++];
+					});
+				}
+			function tradFormula(pLinha, pColuna, pId){
+				console.log("Trad: "+pId);
+				}
+			// INICIA PROCESSAMENTO QUANDO TODA A PÁGINA ESTÁTICA FOR CARREGADA
+			function init(){
+				addHeaders(arrTitulos);
+				for(j=1;j<=NO_LINHAS;j++){
+					addLine(j*10); // Intervalos de 10/10 na numeração
+					}
+				addTitles();
+				}
+				
+		</script>
+	</head>
+	<body onload="init();">
+		<header id="entradas">
+			<label><b>Dado/Fórmula: </b></label><input id="entry" type="text" size="50">
+		</header>
+		<ul id="main" onclick="habilEdit(event)" onfocusout="entrou(event)" oncontextmenu="contexto(event)">
+		
+		</ul>
+		<div id="ctxt">
+			<table>
+				<label>Célula inicial:</label><input id="celTag" size=8> <b>&rarr;</b> <label>final:</label><input id="celFinal" size=8> 
+				<caption>FUNÇÕES DE PLANILHA</caption><br>
+				<button onclick="runSele();">Seleciona<br>Intervalo</button><button onclick="desSele();">Limpa<br>Seleção</button>
+				<button onclick="numeraSele();">Numera<br>Intervalo</button><button onclick="runSeleFormula();">Calcula no<br>Intervalo</button>
+			</table>
+		</div>
+	</body>
+</html>
