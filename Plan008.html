@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<! DOCTYPE html>
 <html>
 	<head>
 		<title>Plan008</title>
@@ -16,6 +16,7 @@
 				font-size: 14px;
 				}
 			 BODY {width: 120%;}
+			 BUTTON { border-radius: 6px; }
 			 DIV#ctxt {
 				background-color: antiquewhite;
 				border: solid 1px teal;
@@ -125,7 +126,7 @@
 					source.setAttribute("align","right");
 					}
 				if( dado.substr(0,1) == "=" ){
-					source.setAttribute("data-eq",dado.substr(1,99));
+					source.setAttribute("data-eq",(dado.substr(1,99)).trim());
 					}
 				}
 			// Destrincha uma célula em linha e coluna
@@ -143,6 +144,8 @@
 				getTags("UL#main > LI > UL > LI.cz").forEach(function(obj){
 					obj.className = "";
 					});
+				getTag("INPUT#celtag").value = "";
+				getTag("INPUT#celfinal").value = "";
 				}
 			// Numera as células da seleção, em ordem crescente
 			function numeraSele(){
@@ -269,7 +272,7 @@
 		<header id="entradas">
 			<label><b>Dado/Fórmula: </b></label><input id="entry" type="text" size="50">
 		</header>
-		<ul id="main" onclick="habilEdit(event);" onfocusout="entrou(event)" oncontextmenu="contexto(event)">
+		<ul id="main" onclick="habilEdit(event)" onfocusout="entrou(event)" oncontextmenu="contexto(event)">
 		
 		</ul>
 		<div id="ctxt">
