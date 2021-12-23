@@ -4,7 +4,7 @@
 		<title>Plan009</title>
 		<meta charset="iso-8859-1"/>
 		<meta name="author" content="Bernardo Meyer">
-		<meta name="description" content="Interceptação do menu de contexto. Criada a função contexto no evento oncontextmenu do UL#main">
+		<meta name="description" content="Tratamento de fórmulas na função habilEdit.">
 		<meta name="keywords" content="sites, web, desenvolvimento, HTML5">
 		<style>
 			:root {
@@ -204,9 +204,12 @@
 						COLUNA = arrd.Coluna;
 						if( ARG == "calc" ){
 							if( getTag("LI#"+vId).getAttribute("data-eq") ){
-								no = getTag("LI#"+vId).getAttribute("data-eq");
-								console.log(no);
-								formula = tradFormula(LINHA, COLUNA, no);
+								formula = getTag("LI#"+vId).getAttribute("data-eq");
+								console.log(formula); // fórmula
+								formula = tradFormula(LINHA, COLUNA, formula);
+								// Substitui a fórmula (apenas no momento) pelo valor
+								getTag("LI#"+vId).innerText = formula;
+								console.log(formula); // fórmula traduzida
 								}
 							}
 						irmao = noIni.nextElementSibling;
@@ -220,7 +223,8 @@
 					}
 				return true;
 				}
-			// Habilita edição em uma célula
+			// Habilita edição em UMA célula
+			// Se houver fórmula, deve trazê-la, ao invés do conteúdo
 			function habilEdit(e){
 				e.stopPropagation();
 				var source = e.target || e.srcElement;
@@ -232,6 +236,11 @@
 					document.querySelector("INPUT#entry").value = source.innerText;
 					}
 				document.querySelector("UL[id^='t']").setAttribute("contentEditable",false);
+				// Verifica se existe uma fórmula ativa nesta célula
+				var vId = source.id;
+				if( getTag("LI#"+vId).getAttribute("data-eq") ){
+					getTag("LI#"+vId).innerText = "=" + getTag("LI#"+vId).getAttribute("data-eq");
+					}
 				// Seta célula final no menu de contexto
 				if( getTag("INPUT#celFinal").value == "" ){
 					getTag("INPUT#celFinal").value = source.id;
@@ -278,8 +287,35 @@
 					obj.innerText = arrTitulos[ind++];
 					});
 				}
-			function tradFormula(pLinha, pColuna, pId){
-				console.log("Trad: "+pId);
+			// Pega o valor numérico de uma célula
+			function getCelVal(vId){
+				return getTag("LI#"+vId).innerText;
+				}
+			// Converte uma letra da fórmula em formato t999c999 de  acordo com a Linha e Coluna da célula
+			// A letra corresponde à coluna e a linha é definida pelo parâmetro pLinha
+			// As maiúsculas começam no ASC 65 ("A")
+			function convLetra2cel(Letra, pLinha, pColuna){
+				var no = (Letra.charCodeAt(0)-64)*10; // As colunas são incrementadas de 10/10
+				no = ("000"+no).substr(-3);
+				var cel = "t"+pLinha+"c"+no;
+				return cel;
+				}
+			// Traduz a fórmula com letras da planilha em expressão com fatores no formato t999c999
+			function tradFormula(pLinha, pColuna, pFormula){
+				var S = "";
+				console.log("Trad: "+pFormula);
+				var c = null;
+				for(i=0;i<pFormula.length;i++){
+					c = pFormula[i];
+					if( c >= "A" && c <= "Z" ){
+						console.log(getCelVal(convLetra2cel(c, pLinha, pColuna)));
+						S = S.concat(getCelVal(convLetra2cel(c, pLinha, pColuna)));
+						} else {
+						console.log(c);
+						S = S.concat(c);
+						}
+					}
+				return eval(S);
 				}
 			// INICIA PROCESSAMENTO QUANDO TODA A PÁGINA ESTÁTICA FOR CARREGADA
 			function init(){
