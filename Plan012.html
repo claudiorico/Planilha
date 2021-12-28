@@ -1,0 +1,520 @@
+<! DOCTYPE html>
+<html>
+	<head>
+		<title>Plan012</title>
+		<meta charset="iso-8859-1"/>
+		<meta name="author" content="Bernardo Meyer">
+		<meta name="description" content="Tratamento de fórmulas na função habilEdit.">
+		<meta name="keywords" content="sites, web, desenvolvimento, HTML5">
+		<style>
+			:root {
+				--corgeral: rgb(0,91,142);
+				}
+			* {
+				color: var(--corgeral);
+				font-family: Verdana;
+				font-size: 14px;
+				}
+			 BODY {width: 120%;}
+			 BUTTON { 
+				 border: solid 1px peru; 
+				 border-radius: 6px; 
+				 }
+			 DIV#ctxt {
+				background-color: antiquewhite;
+				border: solid 1px wheat;
+				border-radius: 6px;
+				display: none;
+				font-weight: bold;
+				margin: 0px;
+				padding: 2px;
+				position: absolute;
+				top: -500px;
+				left: 350px;
+				width: 400px;
+				}
+			 DIV#ctxtcel {
+				background-color: khaki;
+				border: solid 1px bisque;
+				border-radius: 6px;
+				display: none;
+				font-weight: bold;
+				margin: 0px;
+				padding: 2px;
+				position: absolute;
+				top: -500px;
+				left: 350px;
+				width: 400px;
+				}
+			DIV#ctxt  TABLE {
+				margin: 0px;
+				padding: 0px;
+				width: 100%;
+				}
+			DIV#ctxtcel  TABLE {
+				margin: 0px;
+				padding: 0px;
+				width: 100%;
+				}
+			DIV#ctxt  TABLE  CAPTION{
+				color: chocolate;
+				font-size: 24px;
+				font-weight: bold;
+				}
+			DIV#ctxtcel  TABLE  CAPTION{
+				color: chocolate;
+				font-size: 24px;
+				font-weight: bold;
+				}
+			HEADER {
+				margin-bottom: 20px;
+				}
+			INPUT {
+				border-radius: 8px;
+				}
+			LABEL {
+				font-weight: bold;
+				}
+			 UL#main {
+				
+				}
+			 UL#main, UL#main LI UL {
+				list-style-type: none;
+				display: table-row;
+				max-height: 20px;
+				}
+			UL#main LI UL LI {
+				
+				border: solid 1px lightgrey; 
+				display: inline-block;
+				float: none;
+				height: 30px;
+				margin: 0px;
+				max-height: 30px;
+				overflow: hidden;
+				padding: 0px;
+				text-align: center;
+				text-overflow: hidden;
+				white-space: nowrap;
+				width: 90px;
+				}
+				
+			LI[id^='t000c'] {
+				align-items: center;
+				background-color: var(--corgeral);
+				color: white;
+				line-height: 210%;
+				padding-top: 10px;
+				text-align: center;
+				vertical-align: center;
+				}
+			LI.cz {
+				background-color: lightgrey;
+				border: solid 1px white;
+				}
+		</style>
+		<script>
+			var NO_COLUNAS = 20;
+			var NO_LINHAS = 10;
+			var arrTitulos = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T"];
+			var SELE = [];
+			var CEL_ATUAL = "";
+			// Devolve o primeiro nó de acordo com critério de seletor
+			function getTag(obj){
+				return document.querySelector(obj);
+				}
+			// Devolve uma coleção segundo um seletor genérico
+			function getTags(obj){
+				return document.querySelectorAll(obj);
+				}
+			// CUIDADO: estilo é o formato sem traço ("-")
+			// Configura o estilo de uma TAG/Seletor de TAG
+			function setTagStyle(obj, estilo, valor){
+				var cmd = "document.querySelector('"+obj+"').style."+estilo+" = "+valor;
+				eval(cmd);
+				return; 
+				}
+			// Teste que checa se o valor é numérico
+			function isNumeric(str) {
+				if (typeof str != "string") return false;  
+				return !isNaN(str) && !isNaN(parseFloat(str)) 
+				}
+			// Torna visível um container, segundo um seu seletor
+			function show(obj){
+				getTag(obj).style.display = "block";
+				}
+			// Torna INvisível um container, segundo um seu seletor
+			function hide(obj){
+				getTag(obj).style.display = "none";
+				}
+			// Exibe o menu de contexto geral na posição do clique do mouse
+			function contexto(e){
+				console.log("Contexto");
+				var source = e.target || e.srcElement;
+				getTag("INPUT#celTag").value = source.id;
+				console.log(source);
+				show("DIV#ctxt");
+				hide("DIV#ctxtcel");
+				setTagStyle("DIV#ctxt", "top", e.screenY-e.offsetY);
+				setTagStyle("DIV#ctxt", "left", e.screenX+e.offsetX);
+				e.preventDefault();
+				e.stopPropagation();
+				}
+			// Evento disparado quando a Célula perde o foco
+			function entrou(e){
+				e.stopPropagation();
+				var source = e.target || e.srcElement;
+				console.log(source);
+				var obj1 = coord(source.id);
+				var LINHA = obj1.Linha;
+				var COLUNA = obj1.Coluna;
+				var dado = source.innerText;
+				console.log(dado);
+				// Checa se o conteúdo é numérico ou não
+				if( isNumeric(dado) ){
+					//source.setAttribute("align","right");
+					source.style.textAlign = "right";
+					} else {
+					source.style.textAlign = "left";
+					}
+				// Sinal de que é equação
+				if( dado.substr(0,1) == "=" ){
+					source.setAttribute("data-eq",(dado.substr(1,99)).trim());
+					// Calcula a fórmula
+					calcCel(source.id, LINHA, COLUNA);
+					}
+				}
+			// Destrincha uma célula em linha e coluna: 
+			//            tnnncmmm:
+			//                    Linha:    nnn
+			//                    Coluna:  mmm
+			function coord(vSeletor){
+				var arrc = [];
+				var celIni = vSeletor;
+				arrc = celIni.split("c");
+				var celIni_lin = arrc[0].substr(1,3);
+				var celIni_col = arrc[1];
+				return { Linha: celIni_lin, Coluna: celIni_col };
+				}
+			// DesMarca a seleção com class=cz
+			function desSele(){
+				getTags("UL#main > LI > UL > LI.cz").forEach(function(obj){
+					obj.className = "";
+					});
+				getTag("INPUT#celtag").value = "";
+				getTag("INPUT#celfinal").value = "";
+				}
+			// Numera as células da seleção, em ordem crescente
+			function numeraSele(){
+				var i = 1;
+				getTags("UL#main > LI > UL > LI.cz").forEach(function(obj){
+					obj.innerText = i++;
+					obj.style.textAlign = "right";
+					});				
+				}
+			// Marca a seleção com class=cz
+			function runSele(){
+				SELE = seleFaixa(null);
+				}
+			// Marca a seleção com para operações com célula apenas (class=cz)
+			function runSeleMark(){
+				SELE = seleFaixa("mark");
+				}			
+			// Reproduz a fórmula de uma célula em uma faixa
+			function copiaFormula(){
+				SELE = seleFaixa("equac");
+				runCopiaFormula();
+				}
+			function apagaFormula(){
+				SELE = seleFaixa("delefrm");
+				}
+			// Marca a seleção com class=cz
+			function runSeleFormula(){
+				SELE = seleFaixa("calc");
+				}
+			// Marca a seleção com class=cz recalcula campos
+			function runCopiaFormula(){
+				SELE = seleFaixa("cpfrm");
+				}
+			// Calcula o conteúdo de uma célula de acordo com a fórmula
+			function calcCel(pId, LINHA, COLUNA){
+				if( getTag("LI#"+pId).getAttribute("data-eq") ){
+					var formula = getTag("LI#"+pId).getAttribute("data-eq");
+					console.log(formula); // fórmula
+					formula = tradFormula(LINHA, COLUNA, formula);
+					// Substitui a fórmula (apenas no momento) pelo valor
+					getTag("LI#"+pId).innerText = formula;
+					getTag("LI#"+pId).style.textAlign = "right"; 
+					console.log(formula); // fórmula traduzida
+					}					
+				}
+			// Descobre as células da direita de #celTag até chegar à coluna de celFinal
+			// Anota o conjunto de colunas, à medida em que anda
+			// Desce as linhas até atingir a linha de celFinal
+			// Anota os ids de todas as células.
+			function seleFaixa(ARG){
+				var arrd = null;
+				// Célula inicial - a princípio usa do formulário geral
+				var obj1 = coord(getTag("INPUT#celTag").value);
+				var obj2 = coord(getTag("INPUT#celFinal").value);
+				if( ARG == "mark" || ARG == "equac" || ARG == "cpfrm" ){
+					var obj1 = coord(getTag("INPUT#celIni").value);
+					var obj2 = coord(getTag("INPUT#celFim").value);					
+					}
+				var celIni_lin = obj1.Linha;
+				var celIni_col = obj1.Coluna;
+				// Célula final
+				var celFim_lin = obj2.Linha;
+				var celFim_col = obj2.Coluna;
+				// Toma célula INICIAL (primeiro nó) e anda para a direita, até a coluna da célula FINAL
+				var noIni = getTag("LI#t"+celIni_lin + "c" + celIni_col);
+				var LINHA = celIni_lin;
+				var COLUNA = celIni_col;
+				var vId = null;
+				var irmao = null;
+				var inferior = null;
+				var no = null;
+				var formula = null;
+				while ( LINHA <= celFim_lin ){
+					while ( COLUNA <= celFim_col ) {
+						// Muda a classe, logo muda o fundo
+						noIni.className = "cz";
+						// Coloca a fórmula no atributo data-eq (retira sinal de igualdade)
+						formula =  getTag("LI#"+getTag("INPUT#celOri").value).getAttribute("data-eq");
+						//irmao = noIni.nextElementSibling;
+						//noIni = irmao;
+						vId = noIni.id;
+						arrd = coord(vId);
+						LINHA = arrd.Linha;
+						COLUNA = arrd.Coluna;
+						if( ARG == "calc" || ARG == "cpfrm" ){
+							calcCel(vId, LINHA, COLUNA);
+							}
+						if( ARG == "equac" ){
+							getTag("LI#"+vId).setAttribute("data-eq",formula);
+							}
+						if( ARG == "delefrm" ){
+							getTag("LI#"+vId).removeAttribute("data-eq");
+							}
+						irmao = noIni.nextElementSibling;
+						noIni = irmao;
+						// Recalcula LINHA e COLUNA
+						vId = noIni.id;
+						arrd = coord(vId);
+						LINHA = arrd.Linha;
+						COLUNA = arrd.Coluna;
+						}
+					inferior = noIni.parentElement.parentElement.nextElementSibling;
+					vId = inferior.id;
+					noIni = getTag("LI#"+vId + "c" + celIni_col);
+					LINHA = vId.substr(1,3);
+					COLUNA = celIni_col;
+					}
+				return true;
+				}
+			// Duplo clique na célula editada
+			function duploClk(e){
+				console.log("Contexto Célula");
+				var source = e.target || e.srcElement;
+				getTag("INPUT#celIni").value = source.id;
+				console.log(source);
+				show("DIV#ctxtcel");
+				hide("DIV#ctxt");
+				setTagStyle("DIV#ctxtcel", "top", e.screenY-e.offsetY);
+				setTagStyle("DIV#ctxtcel", "left", e.screenX+e.offsetX);
+				e.preventDefault();
+				e.stopPropagation();			
+				getTag("INPUT#celOri").value = source.id;
+
+				var source = e.target || e.srcElement;
+				console.log("DblClk: "+ source.id);
+
+				}
+			// Habilita edição em UMA célula
+			// Se houver fórmula, deve trazê-la, ao invés do conteúdo
+			function habilEdit(e){
+				e.stopPropagation();
+				var source = e.target || e.srcElement;
+				console.log(source);
+				if ( source.tagName != "LI" ) return; 
+				// Centraliza texto
+				source.style.textAlign = "center";
+				//document.querySelector("UL[id^='t']").setAttribute("contentEditable",false);
+				// Verifica se existe uma fórmula ativa nesta célula
+				var vId = source.id;
+				if( getTag("LI#"+vId).getAttribute("data-eq") ){
+					getTag("LI#"+vId).innerText = "=" + getTag("LI#"+vId).getAttribute("data-eq");
+					}
+				// Seta célula final no menu de contexto
+				if( getTag("INPUT#celFinal").value == "" ){
+					getTag("INPUT#celFinal").value = vId;
+					}
+
+				// Torna o conteúdo editável apenas se o campo se tratar de uma tag LI
+				if( vId != CEL_ATUAL ){
+					if( source.tagName == "LI" && (vId).substr(0,4) != "t000"  ){
+						source.setAttribute("contentEditable",true);
+						//source.style.textAlign = "center";
+						source.focus();
+						// Coloca na barra de valores vigentes (entry)
+						document.querySelector("INPUT#entry").value = source.innerText;
+						CEL_ATUAL = vId;
+						}
+					} else {
+					duploClk(e);
+					}
+				}
+			// Localiza a raiz da planilha
+			function rootPlan(){
+				return getTag("#main");
+				}
+			// Adiciona uma linha da Planilha Inicial com o parâmtero de incremento numérico do Id de Linha
+			function addLine(noLin){
+				var conteudo = "";
+				var liMain = document.createElement("LI");
+				var uliMain = null;
+				var uliuMain = null;
+				var sNoLin = noLin.toString();
+				liMain.id = "t"+("000"+(sNoLin).trim()).substr(-3);
+				rootPlan().appendChild(liMain);
+				uliMain = document.createElement("UL");
+				
+				uliMain.id = "t"+("000"+(sNoLin).trim()).substr(-3);
+				liMain.appendChild(uliMain);
+				for(i=1;i<=NO_COLUNAS;i++){
+					uliuMain = document.createElement("LI");
+					// Rotulação de número de coluna * 10, prevendo inserções
+					uliuMain.id = "t"+("000"+(sNoLin).trim()).substr(-3)+"c"+("000"+((i*10).toString()).trim()).substr(-3);
+					uliMain.appendChild(uliuMain);
+					}
+				}
+			// Coloca cabeçalhos das colunas
+			function addHeaders(arr){
+				addLine(0);
+				}
+			// Coloca os títulos  contidos em arrTitulos
+			function addTitles(){
+				var titulos = document.querySelectorAll("LI[id^='t000c']");
+				var ind = 0;
+				titulos.forEach(function(obj){
+					console.log(obj);
+					obj.innerText = arrTitulos[ind++];
+					});
+				}
+			// Pega o valor numérico de uma célula
+			function getCelVal(vId){
+				return getTag("LI#"+vId).innerText;
+				}
+			// Converte uma letra da fórmula em formato t999c999 de  acordo com a Linha e Coluna da célula
+			// A letra corresponde à coluna e a linha é definida pelo parâmetro pLinha
+			// As maiúsculas começam no ASC 65 ("A")
+			function convLetra2cel(Letra, pLinha, pColuna){
+				var no = (Letra.charCodeAt(0)-64)*10; // As colunas são incrementadas de 10/10
+				no = ("000"+no).substr(-3);
+				var cel = "t"+pLinha+"c"+no;
+				return cel;
+				}
+			// Traduz a fórmula com letras da planilha em expressão com fatores no formato t999c999
+			function tradFormula(pLinha, pColuna, pFormula){
+				var S = "";
+				console.log("Trad: "+pFormula);
+				var c = null;
+				for(i=0;i<pFormula.length;i++){
+					c = pFormula[i];
+					if( c >= "A" && c <= "Z" ){
+						console.log(getCelVal(convLetra2cel(c, pLinha, pColuna)));
+						S = S.concat(getCelVal(convLetra2cel(c, pLinha, pColuna)));
+						} else {
+						console.log(c);
+						S = S.concat(c);
+						}
+					}
+				try {
+					var resultado = eval(S);
+					return resultado;
+					} catch (e){
+					alert("Verifique as fórmulas.");
+					}
+				return false;
+				}
+			// INICIA PROCESSAMENTO QUANDO TODA A PÁGINA ESTÁTICA FOR CARREGADA
+			// Função executada após todo o conteúdo HTML ser carregado
+			function init(){
+				addHeaders(arrTitulos);
+				for(j=1;j<=NO_LINHAS;j++){
+					addLine(j*10); // Intervalos de 10/10 na numeração
+					}
+				addTitles();
+				}
+			// Deveria ser a função que coloca um valor no clipboard
+			function copia(e){
+				console.log("copia");
+				var txt = navigator.clipboard.readText();
+				console.log(typeof(txt));
+				console.log(e);
+				if( !(txt.substr(0,1) == "=" || isNumeric(txt)) ){
+					alert("Valor copiado é inválido. Copie um número ou uma fórmula.");
+					}
+				}
+			// Evento para o "onselect" de uma célula
+			function sele(e){
+				console.log("sele");
+				console.log(e);
+				}
+			// Solta o container de funções de célula
+			function dropCel(pObj, e){
+				console.log(pObj);
+				var seletor = pObj.tagName + "#" + pObj.id;
+				setTagStyle(seletor, "top", e.clientY);
+				setTagStyle(seletor, "left", e.screenX);
+				}
+		</script>
+	</head>
+	<body onload="init();">
+		<header id="entradas">
+			<label><b>Dado/Fórmula: </b></label><input id="entry" type="text" size="50">
+		</header>
+		<ul id="main" onclick="habilEdit(event);" onfocusout="entrou(event);" oncontextmenu="contexto(event);" oncopy="copia(event);" onselect="sele(event);">
+		
+		</ul>
+
+		<div id="ctxt" draggable=true ondragend="dropCel(this,event);">
+			<table>
+				<caption>FUNÇÕES DE PLANILHA</caption><br>
+				<tbody>
+					<tr><td>
+					<label>Célula inicial:</label><input id="celTag" size=8> <b>&rarr;</b> <label>final:</label><input id="celFinal" size=8> 
+					</td></tr>
+					<tr><td>
+					<button onclick="runSele();">Seleciona<br>Intervalo</button>
+					<button onclick="desSele();">Limpa<br>Seleção</button>
+					<button onclick="numeraSele();">Numera<br>Intervalo</button>
+					<button onclick="runSeleFormula();">Calcula no<br>Intervalo</button>
+					<button onclick="apagaFormula();">Apaga<br>Fórmula</button>
+					</td></tr>
+				<tbody>
+			</table>
+		</div>
+
+		<div id="ctxtcel" draggable=true ondragend="dropCel(this,event);">
+			<table>
+				<caption>FUNÇÕES DE CÉLULA</caption><br>
+				<tbody>
+					<tr><td colspan=2>
+					<label>Célula original:</label><input id="celOri" size=8>
+					</td></tr>
+					<tr><td>
+					<label>Célula inicial:</label><input id="celIni" size=8> 
+					<b>&rarr;</b> 
+					<label>final:</label><input id="celFim" size=8> 
+					</td></tr>
+					<tr><td>
+					<button onclick="copiaFormula();">Copia<br>Fórmula</button>
+					
+					</td></tr>
+				<tbody>
+			</table>
+		</div>
+
+	</body>
+</html>
