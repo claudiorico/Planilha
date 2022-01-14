@@ -4,7 +4,7 @@
 		<title>Plan013</title>
 		<meta charset="iso-8859-1"/>
 		<meta name="author" content="Bernardo Meyer">
-		<meta name="description" content="Tratamento de fórmulas na função habilEdit.">
+		<meta name="description" content="Função listNos() - Versão com salvamento de células em disposição de letras.">
 		<meta name="keywords" content="sites, web, desenvolvimento, HTML5">
 		<style>
 			:root {
@@ -149,7 +149,7 @@
 			function show(obj){
 				getTag(obj).style.display = "block";
 				}
-			// Torna INvisível um container, segundo um seu seletor
+			// Torna Invisível um container, segundo um seu seletor
 			function hide(obj){
 				getTag(obj).style.display = "none";
 				}
@@ -521,14 +521,14 @@
 					dados.push(temp);
 					S += '{ "classe" : "' + classe + '" , ' ;
 					// Lê cada uma das colunas
-					for(j=0;j<4;j++){
+					for(j=0;j<NO_COLUNAS;j++){
 						lido = netos[j].innerText;
 						dados[i-1][j] = lido;
-						S += '"' + titulos[j] + '":"' + lido + '",'
+						S += '"' + titulos[j] + '":"' + lido + '",';
 						}
 					S = S.substr(0,S.length-2) + '"},';
 					}
-				S = "[" + '{ "NoOS" : "' + $("#noOS").val() + '" }, ' + S.substr(0,S.length-2)+"}]";
+				S = "[" + '{ "NomePlan" : "' + getTag("#NomePlan").value + '" }, ' + S.substr(0,S.length-2)+"}]";
 				return { "json": S, "titulos": titulos, "dados": dados };
 				}
 			// Muda o fonte da letra desta célula
@@ -580,6 +580,7 @@
 	</head>
 	<body onload="init();">
 		<header id="entradas">
+			<label><b>Nome da Planilha: </b></label><input id="NomePlan" type="text" size="30" value="NoName.plan"><br>
 			<label><b>Dado/Fórmula: </b></label><input id="entry" type="text" size="50">
 		</header>
 		<ul id="main" onclick="habilEdit(event);" onfocusout="entrou(event);" oncontextmenu="contexto(event);" oncopy="copia(event);" onselect="sele(event);">

@@ -1,10 +1,10 @@
 <! DOCTYPE html>
 <html>
 	<head>
-		<title>Plan012</title>
+		<title>Plan013</title>
 		<meta charset="iso-8859-1"/>
 		<meta name="author" content="Bernardo Meyer">
-		<meta name="description" content="Tratamento de fórmulas na função habilEdit.">
+		<meta name="description" content="Função listNos() - Versão com salvamento de células em disposição de letras.">
 		<meta name="keywords" content="sites, web, desenvolvimento, HTML5">
 		<style>
 			:root {
@@ -149,7 +149,7 @@
 			function show(obj){
 				getTag(obj).style.display = "block";
 				}
-			// Torna INvisível um container, segundo um seu seletor
+			// Torna Invisível um container, segundo um seu seletor
 			function hide(obj){
 				getTag(obj).style.display = "none";
 				}
@@ -482,6 +482,63 @@
 				var obj = getTag("LI#"+CEL_ATUAL);
 				obj.style.color = getTag("INPUT#corLetraCel").value;
 				}
+			// Lista os nós da planilha
+			function listNos(){
+				var sNoItens = null;
+				var id = null;
+				var filhos = null;
+				var netos = null;
+				var titulos = [];
+				var temp = [];
+				var dados = [];
+				var S = "";
+				var STC = "";
+				var lido = "";
+				/*
+					1a. Linha - Titulos
+				*/
+				filhos = $("UL[id='t000']"); // Linha de títulos tem ID = "it000"
+				netos = filhos.children;
+				for(j=0;j<20;j++){
+					console.log(netos[j].innerText);
+					titulos.push((netos[j].innerText).replace(/\s/g, ""));
+					}
+				/*
+					Linhas de dados
+					Constrói um JSON (S) com os dados da Planilha
+				*/
+				filhos = [];
+				var ind = null;
+				var indTC = null;
+				for(i=1;i<=NO_LINHAS;i++){
+					ind = ("000"+(i*10)).substr(-3);
+					console.log(ind);
+					filhos.push($("UL#t"+ind));
+					}
+				var classe = "";
+				for(i=1;i<filhos.length;i++){
+					classe = filhos[i].getAttribute('class');
+					netos = filhos[i].children;
+					temp = [];
+					dados.push(temp);
+					S += '{ "classe" : "' + classe + '" , ' ;
+					STC += '{ "classe" : "' + classe + '" , ' ;
+					// Lê cada uma das colunas
+					for(j=0;j<NO_COLUNAS;j++){
+						S += '"' + titulos[j] + '":"' + lido + '",';
+						indTC = "t"+("000"+String(i*10).trim()).substr(-3)+"c"+("000"+(((j+1)*10).toString()).trim()).substr(-3);
+						lido = getTag("LI#"+indTC).innerText;
+						dados[i-1][j] = lido;
+						STC += '"' + indTC + '":"' + lido + '",';
+						}
+					S = S.substr(0,S.length-2) + '"},';
+					STC = STC.substr(0,STC.length-2) + '"},';
+					}
+				S = "[" + '{ "NomePlan" : "' + getTag("#NomePlan").value + '" }, ' + S.substr(0,S.length-2)+"}]";
+				STC = "[" + '{ "NomePlan" : "' + getTag("#NomePlan").value + '" }, ' + STC.substr(0,STC.length-2)+"}]";
+				return { "json1": S, "json2": STC, "titulos": titulos, "dados": dados };
+				}
+			// Muda o fonte da letra desta célula
 			function mudaTpLetraCel(){
 				var obj = getTag("LI#"+CEL_ATUAL);
 				var Tipo = getTag("SELECT#TpChr").value;
@@ -490,10 +547,47 @@
 				var comando = "obj.style."+arr[0]+' = "'+arr[1]+'"';
 				eval(comando);
 				}
+			// Grava itens
+			function gravaItens(){
+				var ret =  listNos();
+				var jsonit = ret.json;
+				const obj = JSON.parse(jsonit);
+				// fetch em PHP de CRUD_add_itens.php
+				const options = {
+					method: 'post',
+					headers: {
+						'Content-type': headerISO
+						}
+					}
+				// Chamada AJAX
+				// .then( response => {
+				var jsonits = JSON.stringify(obj);
+				var txtUrl = "CRUD_add_itens.php";
+				console.log(txtUrl);
+				fetch(txtUrl, {
+					method: "post",
+					headers: {
+							'Accept': 'application/json',
+							'Content-Type': headerJSON8859
+							},
+					//Certifique-se de serializar o JSON body
+					body: jsonits
+					})
+					.then(function(response){
+						mostrAviso("Gravando itens ...");
+						return response.text();
+						})
+					.then(function(){ console.log; dmkBtGrava(); clearFmItem();})
+					.catch( (error) => {
+						mostrAviso("Erro gravando itens ...");
+						console.error('gravaItens: ', error);
+						});				
+				}
 		</script>
 	</head>
 	<body onload="init();">
 		<header id="entradas">
+			<label><b>Nome da Planilha: </b></label><input id="NomePlan" type="text" size="30" value="NoName.plan"><br>
 			<label><b>Dado/Fórmula: </b></label><input id="entry" type="text" size="50">
 		</header>
 		<ul id="main" onclick="habilEdit(event);" onfocusout="entrou(event);" oncontextmenu="contexto(event);" oncopy="copia(event);" onselect="sele(event);">
