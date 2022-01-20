@@ -59,6 +59,18 @@
 				if (typeof str != "string") return false;  
 				return !isNaN(str) && !isNaN(parseFloat(str)) 
 				}
+			// Verifica seleção
+			function checkSele(){
+				// Prevê a anulação da seleção de UL (mais de uma célula) - ACRÉSCIMOS
+				var colec = document.querySelectorAll("UL[id='main'],UL[id^='t']");
+				for( nodo in colec ){
+					//document.querySelectorAll("UL[id='main'],UL[id^='t']").setAttribute("contentEditable",false);
+					if( typeof(colec[nodo]) == "object" ){
+						console.log(colec[nodo]);
+						colec[nodo].setAttribute("contentEditable",false);
+						}
+					}
+				}
 			// Habilita edição em uma célula
 			function habilEdit(e){
 				e.stopPropagation();
@@ -70,7 +82,8 @@
 					source.focus();
 					document.querySelector("INPUT#entry").value = source.innerText;
 					}
-				document.querySelector("UL[id^='t']").setAttribute("contentEditable",false);
+				// Prevê a anulação da seleção de UL (mais de uma célula) - ACRÉSCIMOS
+				checkSele();
 				}
 			// Localiza um elemento HTML pelo seu seletor (Classe, Id, etc)
 			function getTag(sele){
@@ -82,20 +95,25 @@
 				}
 			function addLine(noLin){
 				var conteudo = "";
+				// LI que será colocada (para cada linha) como filho do UL#main
 				var liMain = document.createElement("LI");
+				// UL a ser colocado como apoio para as colunas de uma linha (liMain)
 				var uliMain = null;
+				// Conjunto das LIs do conjunto de colunas de uma linha
 				var uliuMain = null;
+				// Transforma o número da linha fornecida em string
 				var sNoLin = noLin.toString();
-				liMain.id = "t"+("000"+(sNoLin).trim()).substr(-3);
+				// Constrói o identificador da célula (LI) - ACRÉSCIMO
+				var idCel = "t"+("000"+(sNoLin).trim()).substr(-3);
+				liMain.id = idCel;
 				rootPlan().appendChild(liMain);
 				uliMain = document.createElement("UL");
-				
-				uliMain.id = "t"+("000"+(sNoLin).trim()).substr(-3);
+				uliMain.id = idCel;
 				liMain.appendChild(uliMain);
 				for(i=1;i<=NO_COLUNAS;i++){
 					uliuMain = document.createElement("LI");
 					// Rotulação de número de coluna * 10, prevendo inserções
-					uliuMain.id = "t"+("000"+(sNoLin).trim()).substr(-3)+"c"+("000"+((i*10).toString()).trim()).substr(-3);
+					uliuMain.id = "t"+("000"+(sNoLin).trim()).substr(-3)+"c"+("000"+((i*10).toString()).trim()).substr(-3); // ALTERAÇÃO
 					uliMain.appendChild(uliuMain);
 					}
 				}
@@ -115,7 +133,7 @@
 			function init(){
 				addHeaders(arrTitulos);
 				for(j=1;j<=NO_LINHAS;j++){
-					addLine(j*10); // Intervalos de 10/10 na numeração
+					addLine(j*10); // Intervalos de 10/10 na numeração de colunas - ALTERAÇÃO
 					}
 				addTitles();
 				}
@@ -126,7 +144,7 @@
 		<header id="entradas">
 			<label><b>Dado/Fórmula: </b></label><input id="entry" type="text" size="50">
 		</header>
-		<ul id="main" onclick="habilEdit(event);">
+		<ul id="main" onclick="habilEdit(event);" onselect="">
 		
 		</ul>
 	</body>
