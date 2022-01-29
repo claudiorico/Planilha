@@ -101,6 +101,17 @@
 				if (typeof str != "string") return false;  
 				return !isNaN(str) && !isNaN(parseFloat(str)) 
 				}
+			// Verifica seleção
+			function checkSele(){
+				// Prevê a anulação da seleção de UL (mais de uma célula) - ACRÉSCIMOS
+				var colec = document.querySelectorAll("UL[id='main'],UL[id^='t']");
+				for( nodo in colec ){
+					if( typeof(colec[nodo]) == "object" ){
+						console.log(colec[nodo]);
+						colec[nodo].setAttribute("contentEditable",false);
+						}
+					}
+				}
 			function show(obj){
 				getTag(obj).style.display = "block";
 				}
@@ -210,13 +221,14 @@
 					source.focus();
 					document.querySelector("INPUT#entry").value = source.innerText;
 					}
-				document.querySelector("UL[id^='t']").setAttribute("contentEditable",false);
+				// Prevê a anulação da seleção de UL (mais de uma célula) - ACRÉSCIMOS
+				checkSele();
 				// Seta célula final no menu de contexto
 				if( getTag("INPUT#celFinal").value == "" ){
 					getTag("INPUT#celFinal").value = source.id;
 					}
 				// "Ilumina" intervalo e devolve um array com as células selecionadas
-				
+				SELE = seleFaixa();
 				}
 			// Localiza um elemento HTML pelo seu seletor (Classe, Id, etc)
 			function getTag(sele){
@@ -228,15 +240,20 @@
 				}
 			function addLine(noLin){
 				var conteudo = "";
+				// LI que será colocada (para cada linha) como filho do UL#main
 				var liMain = document.createElement("LI");
+				// UL a ser colocado como apoio para as colunas de uma linha (liMain)
 				var uliMain = null;
+				// Conjunto das LIs do conjunto de colunas de uma linha
 				var uliuMain = null;
+				// Transforma o número da linha fornecida em string
 				var sNoLin = noLin.toString();
-				liMain.id = "t"+("000"+(sNoLin).trim()).substr(-3);
+				// Constrói o identificador da célula (LI) - ACRÉSCIMO
+				var idCel = "t"+("000"+(sNoLin).trim()).substr(-3);
+				liMain.id = idCel;
 				rootPlan().appendChild(liMain);
 				uliMain = document.createElement("UL");
-				
-				uliMain.id = "t"+("000"+(sNoLin).trim()).substr(-3);
+				uliMain.id = idCel;
 				liMain.appendChild(uliMain);
 				for(i=1;i<=NO_COLUNAS;i++){
 					uliuMain = document.createElement("LI");
@@ -279,7 +296,8 @@
 			<table>
 				<label>Célula inicial:</label><input id="celTag" size=8> <b>&rarr;</b> <label>final:</label><input id="celFinal" size=8> 
 				<caption>FUNÇÕES DE PLANILHA</caption><br>
-				<button onclick="runSele();">Seleciona<br>Intervalo</button><button onclick="desSele();">Limpa<br>Seleção</button>
+				<button onclick="runSele();">Seleciona<br>Intervalo</button>
+				<button onclick="desSele();">Limpa<br>Seleção</button>
 				<button onclick="numeraSele();">Numera<br>Intervalo</button>
 			</table>
 		</div>
