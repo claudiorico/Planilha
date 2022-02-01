@@ -108,6 +108,17 @@
 				if (typeof str != "string") return false;  
 				return !isNaN(str) && !isNaN(parseFloat(str)) 
 				}
+			// Verifica seleção - NEW
+			function checkSele(){
+				// Prevê a anulação da seleção de UL (mais de uma célula) - ACRÉSCIMOS
+				var colec = document.querySelectorAll("UL[id='main'],UL[id^='t']");
+				for( nodo in colec ){
+					if( typeof(colec[nodo]) == "object" ){
+						console.log(colec[nodo]);
+						colec[nodo].setAttribute("contentEditable",false);
+						}
+					}
+				}
 			function show(obj){
 				getTag(obj).style.display = "block";
 				}
@@ -141,7 +152,6 @@
 				if( dado.substr(0,1) == "=" ){
 					source.setAttribute("data-eq",(dado.substr(1,99)).trim());
 					// Calcula a fórmula
-					
 					calcCel(source.id, LINHA, COLUNA);
 					}
 				}
@@ -251,8 +261,9 @@
 					source.focus();
 					document.querySelector("INPUT#entry").value = source.innerText;
 					}
-				document.querySelector("UL[id^='t']").setAttribute("contentEditable",false);
-				// Verifica se existe uma fórmula ativa nesta célula
+				// NEW
+				// Prevê a anulação da seleção de UL (mais de uma célula) - ACRÉSCIMOS
+				checkSele(); // NEW					// Verifica se existe uma fórmula ativa nesta célula
 				var vId = source.id;
 				if( getTag("LI#"+vId).getAttribute("data-eq") ){
 					getTag("LI#"+vId).innerText = "=" + getTag("LI#"+vId).getAttribute("data-eq");
@@ -274,15 +285,20 @@
 				}
 			function addLine(noLin){
 				var conteudo = "";
+				// LI que será colocada (para cada linha) como filho do UL#main
 				var liMain = document.createElement("LI");
+				// UL a ser colocado como apoio para as colunas de uma linha (liMain)
 				var uliMain = null;
+				// Conjunto das LIs do conjunto de colunas de uma linha
 				var uliuMain = null;
+				// Transforma o número da linha fornecida em string
 				var sNoLin = noLin.toString();
-				liMain.id = "t"+("000"+(sNoLin).trim()).substr(-3);
+				// Constrói o identificador da célula (LI) - ACRÉSCIMO
+				var idCel = "t"+("000"+(sNoLin).trim()).substr(-3);
+				liMain.id = idCel;
 				rootPlan().appendChild(liMain);
 				uliMain = document.createElement("UL");
-				
-				uliMain.id = "t"+("000"+(sNoLin).trim()).substr(-3);
+				uliMain.id = idCel;
 				liMain.appendChild(uliMain);
 				for(i=1;i<=NO_COLUNAS;i++){
 					uliuMain = document.createElement("LI");
