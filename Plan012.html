@@ -4,7 +4,7 @@
 		<title>Plan012</title>
 		<meta charset="iso-8859-1"/>
 		<meta name="author" content="Bernardo Meyer">
-		<meta name="description" content="Tratamento de fórmulas na função habilEdit.">
+		<meta name="description" content="SeleFaixa ganhou múltiplas funções. Corrigido o problema de seleção de uma coluna a mais.">
 		<meta name="keywords" content="sites, web, desenvolvimento, HTML5">
 		<style>
 			:root {
@@ -145,6 +145,17 @@
 				if (typeof str != "string") return false;  
 				return !isNaN(str) && !isNaN(parseFloat(str)) 
 				}
+			// Verifica seleção - NEW
+			function checkSele(){
+				// Prevê a anulação da seleção de UL (mais de uma célula) - ACRÉSCIMOS
+				var colec = document.querySelectorAll("UL[id='main'],UL[id^='t']");
+				for( nodo in colec ){
+					if( typeof(colec[nodo]) == "object" ){
+						console.log(colec[nodo]);
+						colec[nodo].setAttribute("contentEditable",false);
+						}
+					}
+				}
 			// Torna visível um container, segundo um seu seletor
 			function show(obj){
 				getTag(obj).style.display = "block";
@@ -178,7 +189,6 @@
 				console.log(dado);
 				// Checa se o conteúdo é numérico ou não
 				if( isNumeric(dado) ){
-					//source.setAttribute("align","right");
 					source.style.textAlign = "right";
 					} else {
 					source.style.textAlign = "left";
@@ -343,10 +353,16 @@
 				var source = e.target || e.srcElement;
 				console.log(source);
 				if ( source.tagName != "LI" ) return; 
-				// Centraliza texto
-				source.style.textAlign = "center";
-				//document.querySelector("UL[id^='t']").setAttribute("contentEditable",false);
-				// Verifica se existe uma fórmula ativa nesta célula
+				// NEW - Torna o conteúdo editável apenas se o campo se tratar de uma tag LI
+				if( source.tagName = "LI" && (source.id).substr(0,4) != "t000"  ){
+					source.setAttribute("contentEditable",true);
+					source.style.textAlign = "center";
+					source.focus();
+					document.querySelector("INPUT#entry").value = source.innerText;
+					}
+				// NEW
+				// Prevê a anulação da seleção de UL (mais de uma célula) - ACRÉSCIMOS
+				checkSele(); // NEW				
 				var vId = source.id;
 				if( getTag("LI#"+vId).getAttribute("data-eq") ){
 					getTag("LI#"+vId).innerText = "=" + getTag("LI#"+vId).getAttribute("data-eq");
@@ -376,16 +392,22 @@
 				}
 			// Adiciona uma linha da Planilha Inicial com o parâmtero de incremento numérico do Id de Linha
 			function addLine(noLin){
+				// NEW - comments
 				var conteudo = "";
+				// LI que será colocada (para cada linha) como filho do UL#main
 				var liMain = document.createElement("LI");
+				// UL a ser colocado como apoio para as colunas de uma linha (liMain)
 				var uliMain = null;
+				// Conjunto das LIs do conjunto de colunas de uma linha
 				var uliuMain = null;
+				// Transforma o número da linha fornecida em string
 				var sNoLin = noLin.toString();
-				liMain.id = "t"+("000"+(sNoLin).trim()).substr(-3);
+				// Constrói o identificador da célula (LI) - ACRÉSCIMO
+				var idCel = "t"+("000"+(sNoLin).trim()).substr(-3);
+				liMain.id = idCel;
 				rootPlan().appendChild(liMain);
 				uliMain = document.createElement("UL");
-				
-				uliMain.id = "t"+("000"+(sNoLin).trim()).substr(-3);
+				uliMain.id = idCel;
 				liMain.appendChild(uliMain);
 				for(i=1;i<=NO_COLUNAS;i++){
 					uliuMain = document.createElement("LI");
