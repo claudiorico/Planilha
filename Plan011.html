@@ -4,7 +4,7 @@
 		<title>Plan011</title>
 		<meta charset="iso-8859-1"/>
 		<meta name="author" content="Bernardo Meyer">
-		<meta name="description" content="Tratamento de fórmulas na função habilEdit.">
+		<meta name="description" content="Tratamento de PROPRIEDADES DA CÉLULA na função habilEdit.">
 		<meta name="keywords" content="sites, web, desenvolvimento, HTML5">
 		<style>
 			:root {
@@ -303,7 +303,8 @@
 				if( getTag("INPUT#celFinal").value == "" ){
 					getTag("INPUT#celFinal").value = vId;
 					}
-
+				// "Ilumina" intervalo e devolve um array com as células selecionadas
+				//SELE = seleFaixa(); // NEW	
 				// Torna o conteúdo editável apenas se o campo se tratar de uma tag LI
 				if( vId != CEL_ATUAL ){
 					if( source.tagName == "LI" && (vId).substr(0,4) != "t000"  ){
@@ -315,6 +316,7 @@
 						CEL_ATUAL = vId;
 						}
 					} else {
+					// Clique foi na própria célula atual (como se fosse um duplo clique)
 					duploClk(e);
 					}
 				}
