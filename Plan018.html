@@ -1,10 +1,10 @@
 <! DOCTYPE html>
 <html>
 	<head>
-		<title>Plan016</title>
+		<title>Plan018</title>
 		<meta charset="iso-8859-1"/>
 		<meta name="author" content="Bernardo Meyer">
-		<meta name="description" content="Inclusão do carregamento de planilha. Lendo as linhas.">
+		<meta name="description" content="Carregamentop final de valores e de fórmulas.">
 		<meta name="keywords" content="sites, web, desenvolvimento, HTML5">
 		<style>
 			:root {
@@ -651,7 +651,31 @@
 							As fórmulas estão na linha 3.
 						*/
 						console.log(JSON.parse(arr[2]));
-						alert(arr[2]);
+						var arrVrs = JSON.parse(arr[2]);
+						var arrVrs1 = arrVrs[1];
+						//alert(arrVrs1);
+						// Get values
+						for (let value of Object.keys(arrVrs1)) {
+							console.log(value+" "+arrVrs1[value]);
+							// Descarrega na planilha
+							getTag("#"+value).innerText = arrVrs1[value];
+							if( isNumeric(arrVrs1[value]) ){
+								getTag("#"+value).style.textAlign = "right";
+								} else {
+								getTag("#"+value).style.textAlign = "left";
+								}
+						}
+						var arrEqs = JSON.parse(arr[3]);
+						var arrEqs1 = arrEqs[1];
+						//alert(arrVrs1);
+						// Get equations
+						for (let value of Object.keys(arrEqs1)) {
+							console.log(value+" "+arrEqs1[value]);
+							// Descarrega na planilha
+							if( arrEqs1[value] != "null" ){
+								getTag("#"+value).setAttribute("data-eq",arrEqs1[value]);
+								}
+						}
 					});
 				}
 		</script>
