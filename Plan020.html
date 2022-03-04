@@ -2,10 +2,10 @@
 <html>
 	<head>
 		<!-- TODO: Gravar estilos da célula em array JSON separado -->
-		<title>Plan019</title>
+		<title>Plan020</title>
 		<meta charset="iso-8859-1"/>
 		<meta name="author" content="Bernardo Meyer">
-		<meta name="description" content="Formatação de casas: decimal() e fmtCasaDec(). ">
+		<meta name="description" content="Armazenar a formatação da célula no atributo data-dec, para ser efetivado na gravação. ">
 		<meta name="keywords" content="sites, web, desenvolvimento, HTML5">
 		<link rel="stylesheet" href="estilo.css">
 		<style>
@@ -38,7 +38,7 @@
 				if (typeof str != "string") return false;  
 				return !isNaN(str) && !isNaN(parseFloat(str)) 
 				}
-			// NEW - Formatação de casas decimais
+			// Formatação de casas decimais
 			// Parâmetro vem em forma de string
 			function decimal(txt, casas){
 				if( isNumeric(casas) ){
@@ -53,10 +53,13 @@
 				}
 			// NEW - Formatação de casas decimais
 			// Ordena a formatação da célula celOri
+			// E armazena o número de casas decimais no atributo data-dec
 			function fmtCasaDec(){
 				var ind = getTag("#celOri").value;
 				var celOri = getTag("LI#"+ind);
-				celOri.innerText = decimal(celOri.innerText , getTag("#casadec").value);
+				var dec = getTag("#casadec").value;
+				celOri.innerText = decimal(celOri.innerText , dec);
+				celOri.setAttribute("data-dec", dec);
 				}
 			// Verifica seleção
 			function checkSele(){
@@ -167,6 +170,8 @@
 			function runCopiaFormula(){
 				SELE = seleFaixa("cpfrm");
 				}
+			// TODO - pegar o atributo de casas decimais (se existir)
+			// e formatar o valor numérico (se for numérico)
 			// Calcula o conteúdo de uma célula de acordo com a fórmula
 			function calcCel(pId, LINHA, COLUNA){
 				if( getTag("LI#"+pId).getAttribute("data-eq") ){
@@ -431,8 +436,11 @@
 				var dados = [];
 				var S = ""; // Salvamento dos nós em formato de Letras A, B, C, ...
 				var STC = ""; // Salvamento dos nós em formato dos IDs de célula
-				var STF = '{ '; // Salvamento dos nós vom fórmula em formato dos IDs de célula
+				var STF = '{ '; // Salvamento dos nós com fórmula em formato dos IDs de célula
 				var SPRE = '{  ' ; // Salvamento dos nós preenchidos apenas
+				// NEW - Constrói a linha JSON das células com o número de casas decimais, caso
+				// exista o atributo data-dec
+				var SDEC = '{ ' ; // Salvamento dos nós com número de decimais em formato dos IDs de célula
 				var lido = "";
 				var attLido = "";
 				/*
@@ -477,7 +485,14 @@
 							SPRE += '"' + indTC + '":"' + lido + '",';
 							attLido = "";
 							attLido = getTag("LI#"+indTC).getAttribute("data-eq");
-							STF += '"' + indTC + '":"' + attLido + '",';
+							// NEW
+							if( attLido != null ){
+								STF += '"' + indTC + '":"' + attLido + '",';
+								}
+							attLido = getTag("LI#"+indTC).getAttribute("data-dec");
+							if( attLido != null ){
+								SDEC += '"' + indTC + '":"' + attLido + '",';
+								}
 							}
 						}
 					S = S.substr(0,S.length-2) + '"},';
@@ -488,8 +503,9 @@
 				STC = "[" + '{ "NomePlan" : "' + getTag("#NomePlan").value + '" }, ' + STC.substr(0,STC.length-2)+"}]";
 				SPRE = "[" + '{ "NomePlan" : "' + getTag("#NomePlan").value + '" }, ' + SPRE.substr(0,SPRE.length-1)+"}]";
 				STF = "[" + '{ "NomePlan" : "' + getTag("#NomePlan").value + '" }, ' + STF.substr(0,STF.length-1)+"}]";
+				SDEC = "[" + '{ "NomePlan" : "' + getTag("#NomePlan").value + '" }, ' + SDEC.substr(0,SDEC.length-1)+"}]";
 				// Para retirar os valores sob forma de array, aplique JSON.parse() a cada um dos json1/2/3
-				return { "json1": S, "json2": STC, "json3": SPRE, "json4": STF, "titulos": titulos, "dados": dados };
+				return { "json1": S, "json2": STC, "json3": SPRE, "json4": STF, "json5": SDEC, "titulos": titulos, "dados": dados };
 				}
 			// Muda o fonte da letra desta célula
 			function mudaTpLetraCel(){
