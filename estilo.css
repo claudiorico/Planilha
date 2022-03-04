@@ -1,0 +1,114 @@
+			:root {
+				--corgeral: rgb(0,91,142);
+				}
+			* {
+				color: var(--corgeral);
+				font-family: Verdana;
+				font-size: 14px;
+				}
+			 BODY {width: 120%;}
+			 BUTTON { 
+				 background: lightblue;
+				 border: solid 1px lightskyblue; 
+				 border-radius: 6px; 
+				 margin-bottom: 2px;
+				 }
+			BUTTON.peq { 
+				font-size: 10px;
+				 }
+			 DIV#ctxt {
+				background-color: lightcyan;
+				border: solid 1px wheat;
+				border-radius: 6px;
+				display: none;
+				font-weight: bold;
+				margin: 0px;
+				padding: 2px;
+				position: absolute;
+				top: -500px;
+				left: 350px;
+				width: 400px;
+				}
+			 DIV#ctxtcel {
+				background-color: lightcyan;
+				border: solid 1px bisque;
+				border-radius: 6px;
+				color: teal;
+				display: none;
+				font-weight: bold;
+				margin: 0px;
+				padding: 2px;
+				position: absolute;
+				top: -500px;
+				left: 350px;
+				width: 400px;
+				}
+			DIV#ctxt  TABLE {
+				margin: 0px;
+				padding: 0px;
+				width: 100%;
+				}
+			DIV#ctxtcel  TABLE {
+				margin: 0px;
+				padding: 0px;
+				width: 100%;
+				}
+			DIV#ctxt  TABLE  CAPTION{
+				color: darkcyan;
+				font-size: 24px;
+				font-weight: bold;
+				}
+			DIV#ctxtcel  TABLE  CAPTION{
+				color: darkcyan;
+				font-size: 24px;
+				font-weight: bold;
+				}
+			HEADER {
+				margin-bottom: 20px;
+				}
+			INPUT {
+				border-color: deepskyblue;
+				border-radius: 8px;
+				border-style: ridge;
+				}
+			LABEL {
+				color: cadetblue;
+				font-weight: bold;
+				}
+			 UL#main {
+				
+				}
+			 UL#main, UL#main LI UL {
+				list-style-type: none;
+				display: table-row;
+				max-height: 20px;
+				}
+			UL#main LI UL LI {
+				
+				border: solid 1px lightgrey; 
+				display: inline-block;
+				float: none;
+				height: 30px;
+				margin: 0px;
+				max-height: 30px;
+				overflow: hidden;
+				padding: 0px;
+				text-align: center;
+				text-overflow: hidden;
+				white-space: nowrap;
+				width: 90px;
+				}
+				
+			LI[id^='t000c'] {
+				align-items: center;
+				background-color: var(--corgeral);
+				color: white;
+				line-height: 210%;
+				padding-top: 10px;
+				text-align: center;
+				vertical-align: center;
+				}
+			LI.cz {
+				background-color: lightgrey;
+				border: solid 1px white;
+				}
