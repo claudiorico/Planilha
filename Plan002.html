@@ -1,8 +1,10 @@
-<html>
-	<head>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+	<meta charset="UTF-8">
 		<title>Plan002</title>
 		<meta name="author" content="Bernardo Meyer">
-		<meta name="description" content="Evento geral de edição de célula.">
+		<meta name="description" content="Evento geral de ediï¿½ï¿½o de cï¿½lula.">
 		<meta name="keywords" content="sites, web, desenvolvimento, HTML5">
 		<style>
 			:root {
@@ -52,7 +54,7 @@
 			var NO_COLUNAS = 20;
 			var NO_LINHAS = 10;
 			var arrTitulos = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T"];
-			// Habilita edição em uma célula
+			// Habilita ediï¿½ï¿½o em uma cï¿½lula
 			function habilEdit(e){
 				e.stopPropagation();
 				var source = e.target || e.srcElement;
@@ -71,15 +73,15 @@
 				}
 			function addLine(noLin){
 				var conteudo = "";
-				// LI que será colocada (para cada linha) como filho do UL#main
+				// LI que serï¿½ colocada (para cada linha) como filho do UL#main
 				var liMain = document.createElement("LI");
 				// UL a ser colocado como apoio para as colunas de uma linha (liMain)
 				var uliMain = null;
 				// Conjunto das LIs do conjunto de colunas de uma linha
 				var uliuMain = null;
-				// Transforma o número da linha fornecida em string
+				// Transforma o nï¿½mero da linha fornecida em string
 				var sNoLin = noLin.toString();
-				// Constrói o identificador da célula (LI) - ACRÉSCIMO
+				// Constrï¿½i o identificador da cï¿½lula (LI) - ACRï¿½SCIMO
 				var idCel = "t"+("000"+(sNoLin).trim()).substr(-3);
 				liMain.id = idCel;
 				liMain.innerText = "Linha " + sNoLin;
@@ -94,11 +96,11 @@
 					uliMain.appendChild(uliuMain);
 					}
 				}
-			// Coloca cabeçalhos das colunas
+			// Coloca cabeï¿½alhos das colunas
 			function addHeaders(arr){
 				addLine(0);
 				}
-			// Adiciona os títulos das colunas: A - T 
+			// Adiciona os tï¿½tulos das colunas: A - T 
 			function addTitles(){
 				var titulos = document.querySelectorAll("LI[id^='t000c']");
 				var ind = 0;
@@ -107,7 +109,7 @@
 					obj.innerText = arrTitulos[ind++];
 					});
 				}
-			// INICIA PROCESSAMENTO QUANDO TODA A PÁGINA ESTÁTICA FOR CARREGADA
+			// INICIA PROCESSAMENTO QUANDO TODA A Pï¿½GINA ESTï¿½TICA FOR CARREGADA
 			function init(){
 				addHeaders(arrTitulos);
 				for(j=1;j<=NO_LINHAS;j++){
@@ -120,7 +122,7 @@
 	</head>
 	<body onload="init();">
 		<header id="entradas">
-			<label><b>Dado/Fórmula: </b></label><input id="entry" type="text" size="50">
+			<label><b>Dado/FÃ³rmula: </b></label><input id="entry" type="text" size="50">
 		</header>
 		<ul id="main" onclick="habilEdit(event);">
 		
